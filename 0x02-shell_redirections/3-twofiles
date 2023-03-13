@@ -1,2 +1,2 @@
 #!/bin/bash
-printf " $(cat /etc/passwd) $(cat /etc/hosts) "
+echo " $(cat /etc/passwd) $(cat /etc/hosts) "
