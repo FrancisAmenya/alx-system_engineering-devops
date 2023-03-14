@@ -1,0 +1,2 @@
+#!/bni/bash
+echo $(($BREATH**$LOVE))
