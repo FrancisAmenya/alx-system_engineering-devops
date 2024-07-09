@@ -1,0 +1,19 @@
+defaults
+    mode http
+    timeout client 15s
+    timeout connect 10s
+    timeout server 15s
+    timeout http-request 10s
+
+frontend francisamenya-frontend
+    bind *:80
+    bind *:443 ssl crt /etc/haproxy/certs/francisamenya.tech.pem
+    http-request redirect scheme https  if !{ ssl_fc }
+    default_backend francisamenya-backend
+
+backend francisamenya-backend
+    http-request redirect scheme https if  !{ ssl_fc }
+    balance roundrobin
+    server 307677-lb-01 35.174.205.46:80 check
+    server 307677-web-01 18.204.9.172:80 check
+    server 307677-web-02 100.26.227.24:80 check
