@@ -5,12 +5,12 @@ defaults
     timeout server 15s
     timeout http-request 10s
 
-frontend francisamenya-frontend
+frontend web-01
     bind *:80
     bind *:443 ssl crt /etc/haproxy/certs/francisamenya.tech.pem
-    default_backend francisamenya-backend
+    default_backend web-02
 
-backend francisamenya-backend
+backend web-02
     http-request redirect scheme https if  !{ ssl_fc }
     balance roundrobin
     server 307677-lb-01 35.174.205.46:80 check
