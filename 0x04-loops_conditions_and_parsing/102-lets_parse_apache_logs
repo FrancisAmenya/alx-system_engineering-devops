@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 # such awk, very linux
+# Define the Apache log file path
+LOG_FILE="/var/log/apache2/access.log"
 
-awk '{print $1,$9}' apache-access.log
+# Use awk to extract and format the IP and HTTP status code
+awk '{print $1 " " $9}' "$LOG_FILE" | awk '{ printf "    %s %s\n", $1, $2 }'
