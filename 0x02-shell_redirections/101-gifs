@@ -1,0 +1,5 @@
+#!/bin/bash
+find . -type f -name "*.gif" | while read -r file; do
+    filename=$(echo "$file" | sed 's/.*\///; s/\.gif$//')
+    echo "$filename"
+done | LC_ALL=C sort -f | sed 's/$/\n/'
