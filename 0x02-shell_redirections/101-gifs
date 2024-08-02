@@ -1,2 +1,2 @@
 #!/bin/bash
-find . -type f -name '.gif' -print0 | LC_ALL=C sort -zfi | tr '\0' '\n' | while IFS= read -r file; do printf '%s\n' "${file%.}"; done
+find . -type f -name '.gif' -print0 | LC_ALL=C sort -zfi | tr '\0' '\n' | while IFS= read -r file do printf '%s\n' "${file%.}" done
