@@ -3,5 +3,25 @@
 # Define the Apache log file path
 LOG_FILE="./apache-access.log"
 
-# Use awk to extract and format the IP and HTTP status code
-awk '{print $1 " " $9}' "$LOG_FILE" | awk '{ printf "    %s %s\n", $1, $2 }'
+# Use awk to extract IP and HTTP status code
+awk '
+{
+    # Match IP address (first field)
+    ip = $1
+
+    # Match HTTP status code (9th field for common log format)
+    # If not found, try 8th field for combined log format
+    status = $9
+    if (status !~ /^[0-9]+$/) {
+        status = $8
+    }
+
+    # If status is still not a number, set it to "Unknown"
+    if (status !~ /^[0-9]+$/) {
+        status = "Unknown"
+    }
+
+    # Print IP and status code
+    print ip, status
+}
+' "$LOG_FILE" | sort | uniq
