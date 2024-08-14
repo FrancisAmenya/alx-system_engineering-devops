@@ -1,52 +1,47 @@
 #!/usr/bin/python3
-"""
-Working on a word counter
-"""
-import requests
-import re
-from collections import defaultdict
+"""Module for task 3"""
 
 
-def count_words(subreddit, word_list, counts=None, after=None):
-    """
-    Recursively queries the Reddit API and counts
-    occurrences of specified keywords
-    in the titles of hot articles for a given subreddit.
+def count_words(subreddit, word_list, word_count={}, after=None):
+    """Queries the Reddit API and returns the count of words in
+    word_list in the titles of all the hot posts
+    of the subreddit"""
+    import requests
 
-    Args:
-        subreddit (str): The name of the subreddit.
-        word_list (list): List of keywords to count.
-        counts (dict): Accumulator for word counts (default None).
-        after (str): Pagination cursor (default None).
-    """
-    if counts is None:
-        counts = defaultdict(int)
+    sub_info = requests.get("https://www.reddit.com/r/{}/hot.json"
+                            .format(subreddit),
+                            params={"after": after},
+                            headers={"User-Agent": "My-User-Agent"},
+                            allow_redirects=False)
+    if sub_info.status_code != 200:
+        return None
 
-    url = f"https://www.reddit.com/r/{subreddit}/hot.json?after={after}"
-    headers = {'User-Agent': 'MyRedditApp/0.1 by YourUsername'}
+    info = sub_info.json()
 
-    response = requests.get(url, headers=headers)
+    hot_l = [child.get("data").get("title")
+             for child in info
+             .get("data")
+             .get("children")]
+    if not hot_l:
+        return None
 
-    if response.status_code == 200:
-        data = response.json()['data']
-        posts = data['children']
+    word_list = list(dict.fromkeys(word_list))
 
-        # Count keywords in titles
-        for post in posts:
-            title = post['data']['title'].lower()
-            for word in word_list:
-                # Create a regex pattern to match the word
-                pattern = r'\b' + re.escape(word.lower()) + r'\b'
-                counts[word.lower()] += len(re.findall(pattern, title))
+    if word_count == {}:
+        word_count = {word: 0 for word in word_list}
 
-        # Check for more posts
-        if data['after']:
-            return count_words(subreddit, word_list, counts, data['after'])
-        else:
-            # Print results
-            sorted_counts = sorted(counts.items(), key=lambda x: (-x[1], x[0]))
-            for word, count in sorted_counts:
-                if count > 0:
-                    print(f"{word} {count}")
+    for title in hot_l:
+        split_words = title.split(' ')
+        for word in word_list:
+            for s_word in split_words:
+                if s_word.lower() == word.lower():
+                    word_count[word] += 1
+
+    if not info.get("data").get("after"):
+        sorted_counts = sorted(word_count.items(), key=lambda kv: kv[0])
+        sorted_counts = sorted(word_count.items(),
+                               key=lambda kv: kv[1], reverse=True)
+        [print('{}: {}'.format(k, v)) for k, v in sorted_counts if v != 0]
     else:
-        return
+        return count_words(subreddit, word_list, word_count,
+                           info.get("data").get("after"))
